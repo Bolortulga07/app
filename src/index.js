@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import { users } from "./db/schemas/userSchema.js";
-import { post } from "./db/schemas/postSchema.js";
+import { posts } from "./db/schemas/postSchema.js";
 import { comments } from "./db/schemas/commentSchema.js";
 
 dotenv.config();
@@ -62,6 +62,22 @@ app.get("/followedBy", async (req, res) => {
   const user = await users.find({ username: "Bilguun" }, { following: 1 });
 
   res.send(user);
+});
+
+app.post("/post", async (req, res) => {
+  try {
+    await posts.create({
+      caption: "",
+      imageUrl:
+        "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.bluecross.org.uk%2Fadvice%2Fhorse%2Fwellbeing-and-care%2Fthe-field-kept-horse&psig=AOvVaw3LUrKyJ8sngz6dJtfrevQl&ust=1739277089639000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCMDDq52OuYsDFQAAAAAdAAAAABAE",
+      user: "67a9debd23fba7946a37d772",
+      likes: ["Bat", "Tuya"],
+      comments: ["Bat"],
+    });
+    res.send("success");
+  } catch (e) {
+    res.send(`errpr: ${e.message}`);
+  }
 });
 
 app.listen(port, () => {

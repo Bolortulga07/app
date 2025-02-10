@@ -3,10 +3,6 @@ const { Schema } = mongoose;
 
 const postSchema = new Schema(
   {
-    _id: {
-      type: String,
-      required: true,
-    },
     caption: {
       type: String,
     },
@@ -15,7 +11,7 @@ const postSchema = new Schema(
       required: true,
     },
     user: {
-      type: { String },
+      type: String,
       required: true,
     },
     likes: {
@@ -34,4 +30,4 @@ const postSchema = new Schema(
   { timestamps: true }
 );
 
-export const post = mongoose.model("post", postSchema);
+export const posts = mongoose.model("posts", postSchema);
