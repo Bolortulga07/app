@@ -17,60 +17,82 @@ mongoose.connect(url).then(() => {
 const app = express();
 
 app.post("/user", async (req, res) => {
+  const username = req.query;
+  const profile = req.query;
+
   try {
     await users.create({
-      username: "Bilguun",
-      profilePic: "1",
-      followers: ["Bilguun", "Tuya", "Khaliun"],
-      following: ["Bilguun", "Bat", "Saraa"],
+      username: username,
+      profilePic: profile,
     });
-    res.send("succes");
+    res.send("success");
   } catch (e) {
     res.send(`error: ${e.message}`);
   }
 });
 
 app.get("/user", async (req, res) => {
-  const user = await users.find({ username: "Bilguun" });
+  const { username } = req.query;
+  console.log(username);
+  const user = await users.find({ username: username });
 
   res.send(user);
 });
 
 app.post("/follow", async (req, res) => {
+  const { username, followerId } = req.query;
+
   const user = await users.findOneAndUpdate(
-    { username: "Bilguun" },
-    { $push: { followers: "Bat" } }
+    { username: username },
+    { $push: { followers: followerId } }
   );
-  res.send(user);
+  res.send("success");
+});
+
+app.post("/following", async (req, res) => {
+  const { username, followerId } = req.query;
+
+  const user = await users.findOneAndUpdate(
+    { username: username },
+    { $push: { following: followerId } }
+  );
+  res.send("success");
 });
 
 app.post("/unfollow", async (req, res) => {
+  const { username, followerId } = req.query;
+
   const user = await users.findOneAndUpdate(
-    { username: "Bilguun" },
-    { $pull: { followers: "Bat" } }
+    { username: username },
+    { $pull: { followers: followerId } }
   );
   res.send(user);
 });
 
 app.get("/users-followers", async (req, res) => {
-  const user = await users.find({ username: "Bilguun" }, { followers: 1 });
+  const { username } = req.query;
+  const user = await users.find({ username: username }, { followers: 1 });
 
   res.send(user);
 });
 
 app.get("/followedBy", async (req, res) => {
-  const user = await users.find({ username: "Bilguun" }, { following: 1 });
+  const { username } = req.query;
+  const user = await users.find({ username: username }, { following: 1 });
 
   res.send(user);
 });
 
 app.post("/post", async (req, res) => {
+  const { username, caption } = req.query;
+
   try {
     await posts.create({
-      caption: "AAA",
+      caption: caption,
       imageUrl:
         "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.bluecross.org.uk%2Fadvice%2Fhorse%2Fwellbeing-and-care%2Fthe-field-kept-horse&psig=AOvVaw3LUrKyJ8sngz6dJtfrevQl&ust=1739277089639000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCMDDq52OuYsDFQAAAAAdAAAAABAE",
-      user: "67a9debd23fba7946a37d772",
+      user: username,
+      likes: [],
     });
     res.send("success");
   } catch (e) {
@@ -79,48 +101,53 @@ app.post("/post", async (req, res) => {
 });
 
 app.get("/post", async (req, res) => {
-  const post = await posts.find();
+  const post = await posts.find().populate("comments");
+
   res.send(post);
 });
 
 app.get("/singlePost", async (req, res) => {
-  const post = await posts.findOne({ user: "67a9debd23fba7946a37d772" });
+  const { username } = req.query;
+  const post = await posts.findOne({ user: username }).populate("comments");
   res.send(post);
 });
 
 app.delete("/postId", async (req, res) => {
-  const post = await posts
-    .find()
-    .deleteOne({ user: "67a9debd23fba7946a37d772" });
+  const { username } = req.query;
+  const post = await posts.find().deleteOne({ user: username });
   res.send("post deleted.");
 });
 
 app.post("/like", async (req, res) => {
+  const { username, like } = req.query;
   const post = await posts.findOneAndUpdate(
-    { user: "67a9debd23fba7946a37d772" },
-    { $push: { likes: "Saraa" } }
+    { user: username },
+    { $push: { likes: like } }
   );
   res.send("like added.");
 });
 
 app.post("/likeDel", async (req, res) => {
+  const { username, like } = req.query;
   const post = await posts.findOneAndUpdate(
-    { user: "67a9debd23fba7946a37d772" },
-    { $pull: { likes: "Tuya" } }
+    { user: username },
+    { $pull: { likes: like } }
   );
   res.send("like deleted.");
 });
 
 app.post("/comment", async (req, res) => {
+  const { username, comment, id } = req.query;
   try {
-    const comment = await comments.create({
-      user: "67a9debd23fba7946a37d772",
-      text: "nice photo.",
+    const newComment = await comments.create({
+      user: username,
+      text: comment,
     });
-    const commentAdd = posts.findOneAndUpdate(
-      { user: "67a9debd23fba7946a37d772" },
-      { $push: comment }
+    const commentAdd = await posts.findOneAndUpdate(
+      { _id: id },
+      { $push: { comments: newComment } }
     );
+    console.log(comment);
     res.send("success");
   } catch (e) {
     console.log(`error: ${e.message}`);
@@ -128,10 +155,17 @@ app.post("/comment", async (req, res) => {
 });
 
 app.delete("/comment", async (req, res) => {
-  const comment = await comments
-    .find()
-    .deleteOne({ user: "67a9debd23fba7946a37d772" });
+  const { id, postId } = req.query;
+  const comment = await comments.deleteOne({ _id: id });
+  const commentAdd = await posts.findOneAndUpdate(
+    { _id: postId },
+    { $pull: { comments: id } }
+  );
   res.send("comment deleted.");
+});
+
+app.get("/feed", async (req, res) => {
+  const post = await users.find();
 });
 
 app.listen(port, () => {
