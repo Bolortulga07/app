@@ -67,7 +67,7 @@ app.get("/followedBy", async (req, res) => {
 app.post("/post", async (req, res) => {
   try {
     await posts.create({
-      caption: "",
+      caption: "AAA",
       imageUrl:
         "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.bluecross.org.uk%2Fadvice%2Fhorse%2Fwellbeing-and-care%2Fthe-field-kept-horse&psig=AOvVaw3LUrKyJ8sngz6dJtfrevQl&ust=1739277089639000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCMDDq52OuYsDFQAAAAAdAAAAABAE",
       user: "67a9debd23fba7946a37d772",
@@ -76,8 +76,18 @@ app.post("/post", async (req, res) => {
     });
     res.send("success");
   } catch (e) {
-    res.send(`errpr: ${e.message}`);
+    res.send(`error: ${e.message}`);
   }
+});
+
+app.get("/post", async (req, res) => {
+  const post = await posts.find();
+  res.send(post);
+});
+
+app.get("/singlePost", async (req, res) => {
+  const post = await posts.findOne({ user: "67a9debd23fba7946a37d772" });
+  res.send(post);
 });
 
 app.listen(port, () => {
