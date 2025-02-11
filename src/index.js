@@ -71,8 +71,6 @@ app.post("/post", async (req, res) => {
       imageUrl:
         "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.bluecross.org.uk%2Fadvice%2Fhorse%2Fwellbeing-and-care%2Fthe-field-kept-horse&psig=AOvVaw3LUrKyJ8sngz6dJtfrevQl&ust=1739277089639000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCMDDq52OuYsDFQAAAAAdAAAAABAE",
       user: "67a9debd23fba7946a37d772",
-      likes: ["Bat", "Tuya"],
-      comments: ["Bat"],
     });
     res.send("success");
   } catch (e) {
@@ -88,6 +86,52 @@ app.get("/post", async (req, res) => {
 app.get("/singlePost", async (req, res) => {
   const post = await posts.findOne({ user: "67a9debd23fba7946a37d772" });
   res.send(post);
+});
+
+app.delete("/postId", async (req, res) => {
+  const post = await posts
+    .find()
+    .deleteOne({ user: "67a9debd23fba7946a37d772" });
+  res.send("post deleted.");
+});
+
+app.post("/like", async (req, res) => {
+  const post = await posts.findOneAndUpdate(
+    { user: "67a9debd23fba7946a37d772" },
+    { $push: { likes: "Saraa" } }
+  );
+  res.send("like added.");
+});
+
+app.post("/likeDel", async (req, res) => {
+  const post = await posts.findOneAndUpdate(
+    { user: "67a9debd23fba7946a37d772" },
+    { $pull: { likes: "Tuya" } }
+  );
+  res.send("like deleted.");
+});
+
+app.post("/comment", async (req, res) => {
+  try {
+    const comment = await comments.create({
+      user: "67a9debd23fba7946a37d772",
+      text: "nice photo.",
+    });
+    const commentAdd = posts.findOneAndUpdate(
+      { user: "67a9debd23fba7946a37d772" },
+      { $push: comment }
+    );
+    res.send("success");
+  } catch (e) {
+    console.log(`error: ${e.message}`);
+  }
+});
+
+app.delete("/comment", async (req, res) => {
+  const comment = await comments
+    .find()
+    .deleteOne({ user: "67a9debd23fba7946a37d772" });
+  res.send("comment deleted.");
 });
 
 app.listen(port, () => {

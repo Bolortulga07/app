@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { commentSchema } from "./commentSchema.js";
 const { Schema } = mongoose;
 
 const postSchema = new Schema(
@@ -17,9 +18,8 @@ const postSchema = new Schema(
     likes: {
       type: [String],
     },
-    comments: {
-      type: [String],
-    },
+    comments: commentSchema,
+
     createdAt: {
       type: String,
     },

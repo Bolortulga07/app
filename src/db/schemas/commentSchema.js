@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
 
-const commentSchema = new Schema(
+export const commentSchema = new Schema(
   {
     user: {
-      type: { String },
+      type: String,
       required: true,
     },
     text: {
