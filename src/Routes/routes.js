@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 import express from "express";
-import { comments } from "../commentSchema.js";
-import { posts } from "../postSchema.js";
-import { users } from "../userSchema.js";
+import { comments } from "../db/schemas/commentSchema.js";
+import { posts } from "../db/schemas/postSchema.js";
+import { users } from "../db/schemas/userSchema.js";
 
 dotenv.config();
 
@@ -101,6 +101,7 @@ route.get("/post", async (req, res) => {
 route.get("/singlePost", async (req, res) => {
   const { username } = req.query;
   const post = await posts.findOne({ user: username }).populate("comments");
+
   res.send(post);
 });
 
