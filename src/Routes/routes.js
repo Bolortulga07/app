@@ -23,6 +23,15 @@ route.post("/user", async (req, res) => {
   }
 });
 
+route.put("/user", async (req, res) => {
+  const { username, profile } = req.query;
+
+  const updateUsername = users.findOneAndUpdate({ username: username });
+  const updateProfile = users.findOneAndUpdate({ profilePic: profile });
+
+  res.send(updateUsername, updateProfile);
+});
+
 route.get("/user", async (req, res) => {
   const { username } = req.query;
   console.log(username);
