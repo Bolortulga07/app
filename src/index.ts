@@ -6,6 +6,8 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { Context } from "./utils/@types";
 import { authMutations } from "./modules/auth/mutations/authMutations";
+import { userQueries } from "./modules/user/graphql/queries";
+import { userMutations } from "./modules/user/graphql/userMutations";
 
 dotenv.config();
 
@@ -30,23 +32,22 @@ const typeDefs = `
     }
 
     type Query {
-        test: String
+        getProfile(username: String, email:String, id: ID!): String
+
     }
 
     type Mutation {
         register(username: String, email: String, password: String): User
         login(email: String, password: String) : String
+        profileUpdate(username: String, email: String, newUsername: String): String
     } 
 `;
 
 const resolvers = {
-  Query: {
-    test: () => {
-      return "test";
-    },
-  },
+  Query: { ...userQueries },
   Mutation: {
     ...authMutations,
+    ...userMutations,
   },
 };
 
