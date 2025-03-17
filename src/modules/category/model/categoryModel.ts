@@ -1,8 +1,8 @@
-import mongoose, { Model } from "mongoose";
+import mongoose, { Model, Document } from "mongoose";
 
 import { categorySchema } from "./categorySchema";
 
-interface ICategory {
+export interface ICategory extends Document {
   name: String;
   status: String;
   description: String;

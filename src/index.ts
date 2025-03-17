@@ -21,6 +21,8 @@ import {
   transactionQueries,
   transactionQueriesTypeDefs,
 } from "./modules/transaction/graphql/transactionQueries";
+import { Transactions } from "./modules/transaction/model/transactionModel";
+import { ICategory } from "./modules/category/model/categoryModel";
 
 dotenv.config();
 
@@ -48,6 +50,7 @@ const typeDefs = `
       name: String,
       status: String,
       description: String,
+      transactionsForCategory:[Transaction]
     }
 
     type Transaction {
@@ -89,6 +92,12 @@ const resolvers = {
     ...userMutations,
     ...categoryMutations,
     ...transactionMutations,
+  },
+  Category: {
+    transactionsForCategory: async (_parent: ICategory) => {
+      return await Transactions.find({ categoryId: { $eq: _parent._id } });
+    },
+    totalAmount: async (_parent: ICategory) => {},
   },
 };
 
