@@ -1,3 +1,4 @@
+import { checkLogin } from "../../../utils/jwtUtils";
 import { Transactions } from "../model/transactionModel";
 
 export const transactionMutations = {
@@ -10,17 +11,21 @@ export const transactionMutations = {
       description: String;
       type: String;
       userId: String;
-    }
+    },
+    { user }: any
   ) => {
-    await Transactions.create({
+    checkLogin(user);
+
+    const createdTransaction = await Transactions.create({
       amount: args.amount,
       categoryId: args.categoryId,
       date: args.date,
       description: args.description,
       type: args.type,
-      userId: args.userId,
+      userId: user.userId,
     });
-    return "Transaction is created.";
+
+    return createdTransaction;
   },
 
   updateTransaction: async (
@@ -35,12 +40,17 @@ export const transactionMutations = {
       userId: String;
     }
   ) => {
-    await Transactions.findOneAndUpdate({ _id: args.id }, { $set: args });
-    return "Transaction is updated.";
+    const updatedTransaction = await Transactions.findOneAndUpdate(
+      { _id: args.id },
+      { $set: args }
+    );
+    return updatedTransaction;
   },
 
   deleteTransaction: async (_parent: null, args: { id: string }) => {
-    await Transactions.findByIdAndDelete({ _id: args.id });
-    return "Transaction is deleted.";
+    const deletedTransaction = await Transactions.findByIdAndDelete({
+      _id: args.id,
+    });
+    return deletedTransaction;
   },
 };

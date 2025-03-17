@@ -6,8 +6,8 @@ export const userQueriesTypeDepfs = `
 `;
 
 export const userQueries = {
-  getProfile: async (_parent: null, args: { id: string }, { user }: any) => {
+  getProfile: async (_parent: null, _: undefined, { user }: any) => {
     checkLogin(user);
-    return await Users.findById(args.id);
+    return await Users.find(user);
   },
 };

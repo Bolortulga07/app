@@ -5,28 +5,30 @@ export const categoryMutations = {
     _parent: null,
     args: { name: string; status: string; description: string }
   ) => {
-    await Categories.create({
+    const createdCategory = await Categories.create({
       name: args.name,
       status: args.status,
       description: args.description,
     });
-    return "Category created.";
+    return createdCategory;
   },
 
   updateCategory: async (
     _parent: null,
     args: { name: string; status: string; description: string }
   ) => {
-    await Categories.findOneAndUpdate(
+    const updatedCategory = await Categories.findOneAndUpdate(
       { name: args.name },
       {
         $set: args,
       }
     );
-    return "Category is updated.";
+    return updatedCategory;
   },
   deleteCategory: async (_parent: null, args: { id: string }) => {
-    await Categories.findByIdAndDelete({ _id: args.id });
-    return "Category is deleted.";
+    const deletedCategory = await Categories.findByIdAndDelete({
+      _id: args.id,
+    });
+    return deletedCategory;
   },
 };

@@ -72,7 +72,7 @@ const typeDefs = `
         createCategory(name: String!, status: String!, description: String!): Category
         updateCategory(name: String!, status: String!, description: String!): Category
         deleteCategory(id: ID!): Category  
-        createTransaction(amount: Float!, categoryId: ID!, date: String!, description: String!, type: String!, userId: ID!): Transaction
+        createTransaction(amount: Float!, categoryId: ID!, date: String!, description: String!, type: String!): Transaction
         updateTransaction(amount: Float!, categoryId: ID!, date: String!, description: String!, type: String!, userId: ID!): Transaction
         deleteTransaction(id: ID!): Transaction
     } 
@@ -108,7 +108,10 @@ const startServer = async () => {
         const token = req.headers.authorization;
         if (token) {
           try {
-            const tokendata = jwt.verify(token, "123") as User;
+            const tokendata = jwt.verify(
+              token,
+              process.env.SECRET_KEY || ""
+            ) as User;
             return { user: tokendata };
           } catch {
             return { user: null };
