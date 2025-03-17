@@ -1,4 +1,3 @@
-import jwt from "jsonwebtoken";
 import { Users } from "../../user/model/userModel";
 
 interface User {

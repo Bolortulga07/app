@@ -20,7 +20,6 @@ export const categorySchema = new schema(
     },
     description: {
       type: String,
-      required: false,
     },
   },
   { timestamps: true }

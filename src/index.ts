@@ -6,8 +6,21 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { Context } from "./utils/@types";
 import { authMutations } from "./modules/auth/mutations/authMutations";
-import { userQueries } from "./modules/user/graphql/queries";
+import {
+  userQueriesTypeDepfs,
+  userQueries,
+} from "./modules/user/graphql/queries";
 import { userMutations } from "./modules/user/graphql/userMutations";
+import { categoryMutations } from "./modules/category/graphql/categoryMutations";
+import { transactionMutations } from "./modules/transaction/graphql/transactionMutations";
+import {
+  catagoriesQueries,
+  categoryQueriesTypeDefs,
+} from "./modules/category/graphql/categoryQueries";
+import {
+  transactionQueries,
+  transactionQueriesTypeDefs,
+} from "./modules/transaction/graphql/transactionQueries";
 
 dotenv.config();
 
@@ -30,24 +43,52 @@ const typeDefs = `
         email: String
         password: String
     }
+    
+    type Category {
+      name: String,
+      status: String,
+      description: String,
+    }
+
+    type Transaction {
+      amount: Float,
+      categoryId: String,
+      date: String,
+      description: String,
+      type: String,
+      userId: String,
+  }
 
     type Query {
-        getProfile(username: String, email:String, id: ID!): String
-
+      ${userQueriesTypeDepfs}
+      ${categoryQueriesTypeDefs}
+      ${transactionQueriesTypeDefs}
     }
 
     type Mutation {
         register(username: String, email: String, password: String): User
         login(email: String, password: String) : String
         profileUpdate(username: String, email: String, newUsername: String): String
+        createCategory(name: String!, status: String!, description: String!): Category
+        updateCategory(name: String!, status: String!, description: String!): Category
+        deleteCategory(id: ID!): Category  
+        createTransaction(amount: Float!, categoryId: ID!, date: String!, description: String!, type: String!, userId: ID!): Transaction
+        updateTransaction(amount: Float!, categoryId: ID!, date: String!, description: String!, type: String!, userId: ID!): Transaction
+        deleteTransaction(id: ID!): Transaction
     } 
 `;
 
 const resolvers = {
-  Query: { ...userQueries },
+  Query: {
+    ...userQueries,
+    ...catagoriesQueries,
+    ...transactionQueries,
+  },
   Mutation: {
     ...authMutations,
     ...userMutations,
+    ...categoryMutations,
+    ...transactionMutations,
   },
 };
 

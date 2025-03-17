@@ -2,7 +2,7 @@ import mongoose, { Model } from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-import { userSchema } from "./schema/userSchema";
+import { userSchema } from "./userSchema";
 
 interface IUser {
   username: string;
