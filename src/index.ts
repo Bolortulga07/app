@@ -22,7 +22,8 @@ import {
   transactionQueriesTypeDefs,
 } from "./modules/transaction/graphql/transactionQueries";
 import { Transactions } from "./modules/transaction/model/transactionModel";
-import { ICategory } from "./modules/category/model/categoryModel";
+import { Categories, ICategory } from "./modules/category/model/categoryModel";
+import { IUser } from "./modules/user/model/userModel";
 
 dotenv.config();
 
@@ -40,17 +41,29 @@ interface User {
 
 const typeDefs = `
     type User {
-        id: ID!
-        username: String
-        email: String
-        password: String
+      id: ID!,
+      username: String,
+      email: String,
+      password: String,
+      transactionsForUser: [Transaction],  
+      totalAmount: Int,
+      totalIncomeExpense: [AmountType],
+      transactionCount: Int.
+    }
+
+    type AmountType {
+      income: Int
+      expense: Int
     }
     
     type Category {
       name: String,
       status: String,
       description: String,
-      transactionsForCategory:[Transaction]
+      transactionsForCategory:[Transaction],
+      totalAmount:Int,
+      totalIncomeExpense: [AmountType],
+      transactionCount: Int
     }
 
     type Transaction {
@@ -97,7 +110,115 @@ const resolvers = {
     transactionsForCategory: async (_parent: ICategory) => {
       return await Transactions.find({ categoryId: { $eq: _parent._id } });
     },
-    totalAmount: async (_parent: ICategory) => {},
+    totalAmount: async (parent: ICategory) => {
+      const [test] = await Transactions.aggregate([
+        {
+          $match: {
+            categoryId: parent._id,
+          },
+        },
+        {
+          $addFields: {
+            totalAmount: {
+              $sum: "$amount",
+            },
+          },
+        },
+        {
+          $project: {
+            totalAmount: 1,
+          },
+        },
+      ]);
+
+      return test.totalAmount;
+    },
+
+    totalIncomeExpense: async (_parent: ICategory) => {
+      return await Transactions.aggregate([
+        {
+          $match: {
+            categoryId: {
+              $eq: _parent._id,
+            },
+          },
+        },
+        {
+          $project: {
+            income: {
+              $sum: {
+                $cond: [{ $eq: ["$type", "income"] }, "$amount", 0],
+              },
+            },
+            expense: {
+              $sum: {
+                $cond: [{ $eq: ["$type", "expense"] }, "$amount", 0],
+              },
+            },
+          },
+        },
+      ]);
+    },
+
+    transactionCount: async (parent: ICategory) => {
+      return await Transactions.countDocuments({ categoryId: parent.id });
+    },
+  },
+  User: {
+    transactionsForUser: async (parent: IUser) => {
+      return await Transactions.find({ userId: parent.id });
+    },
+
+    totalAmount: async (parent: IUser) => {
+      const [total] = await Transactions.aggregate([
+        {
+          $match: {
+            userId: parent._id,
+          },
+        },
+        {
+          $addFields: {
+            totalAmount: {
+              $sum: "$amount",
+            },
+          },
+        },
+        {
+          $project: {
+            totalAmount: 1,
+          },
+        },
+      ]);
+
+      return total.totalAmount;
+    },
+
+    totalIncomeExpense: async (parent: IUser) => {
+      return await Transactions.aggregate([
+        {
+          $match: {
+            userId: parent.id,
+          },
+        },
+        {
+          $project: {
+            income: {
+              $sum: {
+                $cond: [{ $eq: ["$type", "income"] }, "$amount", 0],
+              },
+            },
+            expense: {
+              $sum: {
+                $cond: [{ $eq: ["$type", "expense"] }, "$amount", 0],
+              },
+            },
+          },
+        },
+      ]);
+    },
+    transactionCount: async (parent: IUser) => {
+      return await Transactions.countDocuments({ userId: parent.id });
+    },
   },
 };
 
