@@ -67,11 +67,11 @@ export const transactionQueries = {
     return await Transactions.find(filter)
       .limit(limit)
       .skip(skip)
-      .sort({ [sortBy]: sortOrder })
-      .sort(type)
-      .select("-categoryId")
-      .find({ categoryId: { $in: categoryIds } })
-      .sort({ [sortByDate]: orderByDate })
-      .find({ amount: { $gte: minAmount } }, { amount: { $lte: maxAmount } });
+      .sort({ [sortBy]: sortOrder });
+    // .sort(type)
+    // .select("-categoryId")
+    // .find({ categoryId: { $in: categoryIds } })
+    // .sort({ [sortByDate]: orderByDate })
+    // .find({ amount: { $gte: minAmount } }, { amount: { $lte: maxAmount } });
   },
 };
