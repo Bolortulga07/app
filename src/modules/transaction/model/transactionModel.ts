@@ -1,7 +1,7 @@
-import mongoose, { Model } from "mongoose";
+import mongoose, { Document, Model } from "mongoose";
 import { transactionSchema } from "./transactionSchema";
 
-interface ITransaction {
+export interface ITransaction extends Document {
   amount: Number;
   categoryId: String;
   date: String;

@@ -21,9 +21,12 @@ import {
   transactionQueries,
   transactionQueriesTypeDefs,
 } from "./modules/transaction/graphql/transactionQueries";
-import { Transactions } from "./modules/transaction/model/transactionModel";
+import {
+  ITransaction,
+  Transactions,
+} from "./modules/transaction/model/transactionModel";
 import { Categories, ICategory } from "./modules/category/model/categoryModel";
-import { IUser } from "./modules/user/model/userModel";
+import { IUser, Users } from "./modules/user/model/userModel";
 
 dotenv.config();
 
@@ -48,7 +51,7 @@ const typeDefs = `
       transactionsForUser: [Transaction],  
       totalAmount: Int,
       totalIncomeExpense: [AmountType],
-      transactionCount: Int.
+      transactionCount: Int
     }
 
     type AmountType {
@@ -57,6 +60,7 @@ const typeDefs = `
     }
     
     type Category {
+      _id: String,
       name: String,
       status: String,
       description: String,
@@ -73,6 +77,8 @@ const typeDefs = `
       description: String,
       type: String,
       userId: String,
+      categoryOfTransaction: Category,
+      userOfTransaction: [User],
   }
 
     type Query {
@@ -218,6 +224,14 @@ const resolvers = {
     },
     transactionCount: async (parent: IUser) => {
       return await Transactions.countDocuments({ userId: parent.id });
+    },
+  },
+  Transaction: {
+    categoryOfTransaction: async (parent: ITransaction) => {
+      return await Categories.findOne({ _id: parent.categoryId });
+    },
+    userOfTransaction: async (parent: ITransaction) => {
+      return await Users.find({ transactionId: parent.id });
     },
   },
 };
