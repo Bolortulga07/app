@@ -5,3 +5,7 @@ export interface User {
 export interface Context {
   user?: User;
 }
+
+export interface IContext {
+  userId?: string;
+}
