@@ -47,57 +47,45 @@ const generateFilter = (args: any) => {
     filter["categoryId"] = categoryId;
   }
 
-  if (categoryIds.length) {
+  if (categoryIds && categoryIds.length) {
     filter["categoryId"] = { $in: categoryIds };
   }
 
   if (type) {
-    filter["type"] = { $eq: type };
+    filter["type"] = type;
+  }
+
+  if (minAmount !== undefined || maxAmount !== undefined) {
+    filter["amount"] = {};
+    if (minAmount !== undefined) filter["amount"].$gte = minAmount;
+    if (maxAmount !== undefined) filter["amount"].$lte = maxAmount;
   }
 
   return filter;
 };
 
 export const transactionQueries = {
-  getTransaction: async (_parent: null, args: { id: string }) => {
-    return await Transactions.findById({ _id: args.id });
-  },
-
-  getTransactions: async (
-    _parent: null,
-    args: {
-      categoryId: string;
-      limit: number;
-      skip: number;
-      page: number;
-      sortBy: string;
-      sortOrder: SortOrder;
-      type: string;
-      categoryIds: string[];
-      sortByDate: string;
-      orderByDate: SortOrder;
-      minAmount: number;
-      maxAmount: number;
-    }
-  ) => {
+  getTransactions: async (_parent: null, args: any) => {
     const {
       limit = 20,
       page = 1,
-      skip = (page - 1) * limit,
       sortBy = "createdBy",
       sortOrder = -1,
+      sortByDate,
+      orderByDate,
     } = args;
+    const skip = (page - 1) * limit;
+    const filter = generateFilter(args);
 
-    const filter: TransactionFilter = generateFilter(args);
+    let sortOptions: Record<string, SortOrder> = { [sortBy]: sortOrder };
+
+    if (sortByDate) {
+      sortOptions = { [sortByDate]: orderByDate };
+    }
 
     return await Transactions.find(filter)
       .limit(limit)
       .skip(skip)
-      .sort({ [sortBy]: sortOrder });
-    // .sort(type)
-    // .select("-categoryId")
-    // .find({ categoryId: { $in: categoryIds } })
-    // .sort({ [sortByDate]: orderByDate })
-    // .find({ amount: { $gte: minAmount } }, { amount: { $lte: maxAmount } });
+      .sort(sortOptions);
   },
 };
